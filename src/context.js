@@ -1,78 +1,79 @@
 /* global MathJax */
-const React = require('react');
-const loadScript = require('load-script');
+import React from 'react';
+import PropTypes from 'prop-types';
+import loadScript from 'load-script';
 
 const DEFAULT_SCRIPT =
     'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
 
 const DEFAULT_OPTIONS = {
-    tex2jax: {
-        inlineMath: []
-    },
-    showMathMenu: false,
-    showMathMenuMSIE: false
+  tex2jax: {
+    inlineMath: [],
+  },
+  showMathMenu: false,
+  showMathMenuMSIE: false,
 };
 
 /**
  * Context for loading mathjax
  * @type {[type]}
  */
-const MathJaxContext = React.createClass({
-    propTypes: {
-        children: React.PropTypes.node.isRequired,
-        script:   React.PropTypes.oneOfType([
-            React.PropTypes.string,
-            React.PropTypes.oneOf([false])
-        ]),
-        options:  React.PropTypes.object
-    },
+export default class MathJaxContext extends React.Component {
+  constructor(props) {
+    super(props);
 
-    childContextTypes: {
-        MathJax: React.PropTypes.object
-    },
+    this.onLoad = this.onLoad.bind(this);
 
-    getDefaultProps() {
-        return {
-            script: DEFAULT_SCRIPT,
-            options: DEFAULT_OPTIONS
-        };
-    },
+    this.state = {
+      loaded: false,
+    };
+  }
 
-    getInitialState() {
-        return {
-            loaded: false
-        };
-    },
+  getChildContext() {
+    return {
+      MathJax: typeof MathJax === 'undefined' ? undefined : MathJax,
+    };
+  }
 
-    getChildContext() {
-        return {
-            MathJax: typeof MathJax == 'undefined' ? undefined : MathJax
-        };
-    },
+  componentDidMount() {
+    const { script } = this.props;
 
-    componentDidMount() {
-        const { script } = this.props;
-
-        if (!script) {
-            return this.onLoad();
-        }
-
-        loadScript(script, this.onLoad);
-    },
-
-    onLoad(err) {
-        const { options } = this.props;
-        MathJax.Hub.Config(options);
-
-        this.setState({
-            loaded: true
-        });
-    },
-
-    render() {
-        const { children } = this.props;
-        return React.Children.only(children);
+    if (!script) {
+      return this.onLoad();
     }
-});
 
-module.exports = MathJaxContext;
+    loadScript(script, this.onLoad);
+  }
+
+  onLoad() {
+    const { options } = this.props;
+    MathJax.Hub.Config(options);
+
+    this.setState({
+      loaded: true,
+    });
+  }
+
+  render() {
+    const { children } = this.props;
+    return React.Children.only(children);
+  }
+}
+
+MathJaxContext.propTypes = {
+  children: PropTypes.node.isRequired,
+  script: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.oneOf([false]),
+  ]),
+  options: PropTypes.shape(),
+};
+
+MathJaxContext.defaultProps = {
+  script: DEFAULT_SCRIPT,
+  options: DEFAULT_OPTIONS,
+};
+
+MathJaxContext.childContextTypes = {
+  MathJax: PropTypes.object,
+};

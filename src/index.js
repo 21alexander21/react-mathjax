@@ -1,7 +1,5 @@
-const MathJaxNode = require('./node');
-const MathJaxContext = require('./context');
+import MathJaxNode from './node';
+import MathJaxContext from './context';
 
-module.exports = {
-    Node:    MathJaxNode,
-    Context: MathJaxContext
-};
+export const Node = MathJaxNode;
+export const Context = MathJaxContext;
